@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>雪花ID解析工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        input,
+        button {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>雪花ID解析工具</h1>
+    <label for="snowflakeId">输入雪花ID：</label>
+    <input type="text" id="snowflakeId" placeholder="请输入雪花ID">
+    <button onclick="parseSnowflakeId()">解析</button>
+    <h2>解析结果：</h2>
+    <p id="result"></p>
+
+    <script>
+        function parseSnowflakeId() {
+            const snowflakeId = BigInt(document.getElementById('snowflakeId').value);
+            const epoch = BigInt(1288834974657); // 基准时间戳（通常是1970-01-01 00:00:00 UTC）
+
+            // 解析各部分
+            const timestamp = (snowflakeId >> 22n) + epoch;
+            const datacenterId = (snowflakeId >> 17n) & 0x1Fn;
+            const workerId = (snowflakeId >> 12n) & 0x1Fn;
+            const sequence = snowflakeId & 0xFFFn;
+
+            const date = new Date(Number(timestamp));
+
+            // 将各部分转换为二进制字符串
+            const snowflakeIdBinary = snowflakeId.toString(2).padStart(64, '0');
+            const timestampBinary = ((snowflakeId >> 22n) & 0x1FFFFFFFFFFn).toString(2).padStart(41, '0');
+            const datacenterIdBinary = datacenterId.toString(2).padStart(5, '0');
+            const workerIdBinary = workerId.toString(2).padStart(5, '0');
+            const sequenceBinary = sequence.toString(2).padStart(12, '0');
+
+            document.getElementById('result').innerHTML = `
+                <strong>雪花ID：</strong> ${snowflakeId.toString()}<br>
+                <strong>雪花ID（二进制）：</strong> ${snowflakeIdBinary}<br>
+                <strong>基准时间戳：</strong> ${epoch.toString()}<br>
+                <strong>时间戳：</strong> ${timestamp.toString()} (${date.toISOString()})<br>
+                <strong>时间戳（二进制）：</strong> ${timestampBinary}<br>
+                <strong>数据中心ID：</strong> ${datacenterId.toString()}<br>
+                <strong>数据中心ID（二进制）：</strong> ${datacenterIdBinary}<br>
+                <strong>机器ID：</strong> ${workerId.toString()}<br>
+                <strong>机器ID（二进制）：</strong> ${workerIdBinary}<br>
+                <strong>序列号：</strong> ${sequence.toString()}<br>
+                <strong>序列号（二进制）：</strong> ${sequenceBinary}
+            `;
+        }
+    </script>
+</body>
+
+</html>
